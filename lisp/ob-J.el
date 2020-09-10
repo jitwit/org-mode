@@ -46,8 +46,7 @@
 (defun org-babel-expand-body:J (body _params &optional _processed-params)
   "Expand BODY according to PARAMS, return the expanded body.
 PROCESSED-PARAMS isn't used yet."
-  body;; (org-babel-J-interleave-echos-except-functions body)
-  )
+  body)
 
 (defalias 'org-babel-execute:j 'org-babel-execute:J)
 
@@ -61,17 +60,12 @@ This function is called by `org-babel-execute-src-block'."
 	 (sit-time (let ((sit (assq :sit params)))
 		     (if sit (cdr sit) .1)))
          (full-body (org-babel-expand-body:J
-                     body params processed-params))
-	 (tmp-script-file (org-babel-temp-file "J-src")))
+                     body params processed-params)))
     ;; (org-babel-j-initiate-session sessionp)
-    (org-babel-J-eval-string full-body sit-time)))
-
-(defun org-babel-J-eval-string (str sit-time)
-  "Sends STR to the `j-console-cmd' session and executes it."
-  (j-do WWJ (concat "1!:44 '" default-directory "'"))
-  (with-temp-buffer
-    (j-eval* WWJ str)
-    (buffer-string)))
+    (j-do WWJ (concat "1!:44 '" default-directory "'"))
+    (with-temp-buffer
+      (j-eval* WWJ body)
+      (buffer-string))))
 
 (defun org-babel-j-initiate-session (&optional session)
   "Initiate a J session.
