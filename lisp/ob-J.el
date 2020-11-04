@@ -56,22 +56,27 @@ PARAMS are given by org-babel.
 This function is called by `org-babel-execute-src-block'."
   (message "executing J source code block")
   (let* ((processed-params (org-babel-process-params params))
-	 (sessionp (cdr (assq :session params)))
+	 ;; no session => global, session => file local, 
+	 (session-id (let ((session (assq :session params)))
+		       (if (equal "none" (cdr session))
+			   "~"
+			 (buffer-file-name))))
+	 ;; not needed with jpl-mode
 	 (sit-time (let ((sit (assq :sit params)))
 		     (if sit (cdr sit) .1)))
-         (full-body (org-babel-expand-body:J
-                     body params processed-params)))
-    ;; (org-babel-j-initiate-session sessionp)
-    (j-do WWJ (concat "1!:44 '" default-directory "'"))
-    (with-temp-buffer
-      (j-eval* WWJ body)
-      (buffer-string))))
+	 (foreign-verb (let ((verb (assq :verb params)))
+			 (if verb (cdr verb) "0!:0")))
+         (full-body (org-babel-expand-body:J body params processed-params))
+	 (J (org-babel-j-session session-id)))
+    ;; (princ processed-params)
+    (j-getr J (concat "1!:44 '" default-directory "'"))
+    (j-eval J body foreign-verb)))
 
-(defun org-babel-j-initiate-session (&optional session)
-  "Initiate a J session.
+(defun org-babel-j-session (session-id)
+  "Get the given session's J instance, creating it if necessary.
 SESSION is a parameter given by org-babel."
-  (unless (string= session "none")
-    (j-create-instance (buffer-file-name))))
+  (j-create-instance session-id)
+  (cdr (assq 'engine (gethash session-id jpl-place->j))))
 
 (provide 'ob-J)
 
