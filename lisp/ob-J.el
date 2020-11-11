@@ -66,11 +66,19 @@ This function is called by `org-babel-execute-src-block'."
 		     (if sit (cdr sit) .1)))
 	 (foreign-verb (let ((verb (assq :verb params)))
 			 (if verb (cdr verb) "0!:0")))
+	 (plot (let ((plot (assq :plot params)))
+		 (if plot (cdr plot) nil)))
          (full-body (org-babel-expand-body:J body params processed-params))
 	 (J (org-babel-j-session session-id)))
-    ;; (princ processed-params)
-    (j-getr J (concat "1!:44 '" default-directory "'"))
-    (j-eval J body foreign-verb)))
+    (cond (plot
+	   (j-getr J (concat "1!:44 '" default-directory "'"))
+	   (j-eval J body foreign-verb)
+	   (j-save-plot (concat default-directory plot))
+	   plot ;; (concat "[[file:" plot "]]")
+	   )
+	  (t
+	   (j-getr J (concat "1!:44 '" default-directory "'"))
+	   (j-eval J body foreign-verb)))))
 
 (defun org-babel-j-session (session-id)
   "Get the given session's J instance, creating it if necessary.
