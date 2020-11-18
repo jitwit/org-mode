@@ -68,6 +68,8 @@ This function is called by `org-babel-execute-src-block'."
 			 (if verb (cdr verb) "0!:0")))
 	 (plot (let ((plot (assq :plot params)))
 		 (if plot (cdr plot) nil)))
+	 (viewmat (let ((viewmat (assq :viewmat params)))
+		    (if viewmat (cdr viewmat) nil)))
          (full-body (org-babel-expand-body:J body params processed-params))
 	 (J (org-babel-j-session session-id)))
     (cond (plot
@@ -75,6 +77,12 @@ This function is called by `org-babel-execute-src-block'."
 	   (j-eval J body foreign-verb)
 	   (j-save-plot (concat default-directory plot))
 	   plot ;; (concat "[[file:" plot "]]")
+	   )
+	  (viewmat
+	   (j-getr J (concat "1!:44 '" default-directory "'"))
+	   (j-eval J body foreign-verb)
+	   (j-save-viewmat (concat default-directory viewmat))
+	   viewmat ;; (concat "[[file:" plot "]]")
 	   )
 	  (t
 	   (j-getr J (concat "1!:44 '" default-directory "'"))
