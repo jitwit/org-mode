@@ -74,19 +74,19 @@ This function is called by `org-babel-execute-src-block'."
 	 (J (org-babel-j-session session-id)))
     (cond (plot
 	   (j-getr J (concat "1!:44 '" default-directory "'"))
-	   (j-eval J body foreign-verb)
+	   (j-script J body foreign-verb)
 	   (j-save-plot (concat default-directory plot))
 	   plot ;; (concat "[[file:" plot "]]")
 	   )
 	  (viewmat
 	   (j-getr J (concat "1!:44 '" default-directory "'"))
-	   (j-eval J body foreign-verb)
+	   (j-script J body foreign-verb)
 	   (j-save-viewmat (concat default-directory viewmat))
 	   viewmat ;; (concat "[[file:" plot "]]")
 	   )
 	  (t
 	   (j-getr J (concat "1!:44 '" default-directory "'"))
-	   (j-eval J body foreign-verb)))))
+	   (j-script J body foreign-verb)))))
 
 (defun org-babel-j-session (session-id)
   "Get the given session's J instance, creating it if necessary.
